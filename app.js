@@ -27,31 +27,50 @@ app.get('/todos',(req,res)=>{
     })
   }
   catch(error){
-    res.send('some thing wrong')
+    res.send(error)
   }
   
 })
 app.get('/todos/:id', (req, res) => {
-   
-    const id = req.params.id;
-
-    const todo = todos.find((todo) => todo.id === id);
-
-    res.status(200).json({
+  try{
+    const id = parseInt(req.params.id);
+    if(id){
+      const todo = todos.find((todo) => todo.id === id);
+      if(!todo){
+        res.status(404).json({
+          success: false,
+          message: 'data not found',
+        })
+      }
+      res.status(200).json({
         success: true,
         message: 'todo fetched successfully!',
         data: todo
-    })
+      })
+    }else{
+      res.status(404).json({
+        success: false,
+        message: 'data not found',
+      })
+    }
+  }catch(error){
+    res.send(error)
+  }
 })
 
 app.post('/todos', (req, res) => {
-  const todo = req.body;
-  todos.push(todo);
-  res.status(200).json({
-        success: true,
-        message: 'data added successfully!',
-        data: todo
-    })
+  try{
+    const todo = req.body;
+      todos.push(todo);
+      res.status(200).json({
+            success: true,
+            message: 'data added successfully!',
+            data: todo
+        })
+  }catch(error){
+    res.send(error)
+  }
+
 })
 app.delete('/todos/:id',(req,res) => {
   const id = req.params.id;
