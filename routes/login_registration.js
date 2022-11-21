@@ -5,12 +5,12 @@ const { DB_NAME,TODO_COLL,REGISTER } = require('../constants/collection')
 const { ObjectID } = require('mongodb')
 const bcrypt = require('bcrypt')
 
-async function findUserName (userName,client){
+async function findUser (userdata,client){
 
   const userData = await client
                           .db(DB_NAME)
                           .collection(REGISTER)  
-                          .findOne({user_name:userName})
+                          .findOne({user_name:userdata})
   return userData;
 
 }
@@ -24,7 +24,7 @@ router.post('/register', async(req,res) =>{
     const hashedPassword = await bcrypt.hash(payload.password,salt)
     const registerData = {user_name:payload.user_name, password:hashedPassword}
 
-    const userData = await findUserName(payload.user_name,client)
+    const userData = await findUser(payload.user_name,client)
 
     if(userData){
       return res.status(409).json({
@@ -53,7 +53,8 @@ router.post('/login',async(req,res)=>{
   const client = await dbService.getClient();
   const userName = payload.user_name;
 
-  const userData = await findUserName(userName,client)
+  const userData = await findUser(userName,client)
+
 
   if(!userData){
     return res.status(400).json({
