@@ -124,15 +124,4 @@ router.put('/:id',async (req,res)=>{
 
 
 
-  // router.put('/updateuser/:id', function(req, res) {
-  //   var db = req.db;
-  //   var userToUpdate = req.params.id;
-  //   db.collection('userlist').update({ _id: ObjectId(userToUpdate)}, req.body, function (err, result) {
-  //       res.send(
-  //           (err === null) ? {msg: ''} : {msg: err}
-  //       );
-  //   });
-  // });
-
-
 module.exports = router;
