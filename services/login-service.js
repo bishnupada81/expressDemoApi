@@ -1,5 +1,10 @@
+require('dotenv').config();
 const { DB_NAME,TODO_COLL,REGISTER } = require('../constants/collection')
+const jwt = require('jsonwebtoken')
+
+
 const dbQuery = () => {
+
   async function findUser (userdata,client){
 
     const userData = await client
@@ -9,7 +14,11 @@ const dbQuery = () => {
     return userData;
   
   }
-  return { findUser };
+
+  function generateAccessToken(user){
+    return jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn: '15s'})
+  }
+  return { findUser,generateAccessToken };
 }
 
 

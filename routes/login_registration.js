@@ -5,7 +5,7 @@ const dbService = require('../lib/database')
 const { DB_NAME,TODO_COLL,REGISTER } = require('../constants/collection')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const dbQuery = require('../services/login-service')
+const loginServices = require('../services/login-service')
 const authToken = require('../middleware/auth')
 
 router.post('/user',authToken.authenticationToken,async(req,res) => {
@@ -31,7 +31,7 @@ router.post('/register', async(req,res) =>{
     const hashedPassword = await bcrypt.hash(payload.password,salt)
     const registerData = {user_name:payload.user_name, password:hashedPassword}
 
-    const userData = await dbQuery.findUser(payload.user_name,client)
+    const userData = await loginServices.findUser(payload.user_name,client)
     
     if(userData){
       return res.status(409).json({
@@ -60,7 +60,7 @@ router.post('/login',async(req,res)=>{
   const client = await dbService.getClient();
   const userName = payload.user_name;
 
-  const userData = await dbQuery.findUser(userName,client)
+  const userData = await loginServices.findUser(userName,client)
 
 
   if(!userData){
@@ -83,7 +83,7 @@ router.post('/login',async(req,res)=>{
       })
     }
 
-    const accessToken = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET)
+    const accessToken = loginServices.generateAccessToken(user)
     return res.status(200).json({
       success: true,
       message: 'User Login successfully!',
