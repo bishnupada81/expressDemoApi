@@ -4,7 +4,6 @@ const router = express.Router()
 const dbService = require('../lib/database')
 const { DB_NAME,TODO_COLL,REGISTER } = require('../constants/collection')
 const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
 const loginServices = require('../services/login-service')
 const authToken = require('../middleware/auth')
 
