@@ -1,19 +1,26 @@
+require('dotenv').config();
 const express = require('express')
 const router = express.Router()
 const dbService = require('../lib/database')
 const { DB_NAME,TODO_COLL,REGISTER } = require('../constants/collection')
-const { ObjectID } = require('mongodb')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const dbQuery = require('../services/login-service')
+const authToken = require('../middleware/auth')
 
-async function findUser (userdata,client){
+router.post('/user',authToken.authenticationToken,async(req,res) => {
+  const client = await dbService.getClient();
 
   const userData = await client
                           .db(DB_NAME)
                           .collection(REGISTER)  
-                          .findOne({user_name:userdata})
-  return userData;
+                          .findOne({user_name:req.user.name})
+  return res.status(200).json({
+    success: true,
+    data: userData,
+  })
 
-}
+})
 
 router.post('/register', async(req,res) =>{
   try{
@@ -24,8 +31,8 @@ router.post('/register', async(req,res) =>{
     const hashedPassword = await bcrypt.hash(payload.password,salt)
     const registerData = {user_name:payload.user_name, password:hashedPassword}
 
-    const userData = await findUser(payload.user_name,client)
-
+    const userData = await dbQuery.findUser(payload.user_name,client)
+    
     if(userData){
       return res.status(409).json({
         success: true,
@@ -53,7 +60,7 @@ router.post('/login',async(req,res)=>{
   const client = await dbService.getClient();
   const userName = payload.user_name;
 
-  const userData = await findUser(userName,client)
+  const userData = await dbQuery.findUser(userName,client)
 
 
   if(!userData){
@@ -65,25 +72,27 @@ router.post('/login',async(req,res)=>{
 
   try{
 
-    givenPassword = payload.password;
-    const varifyPassword = await bcrypt.compare(givenPassword,userData.password);
+    const user = { name:userName }
+    const givenPassword = payload.password;
+    const verifyPassword = await bcrypt.compare(givenPassword,userData.password);
 
-    if(!varifyPassword){
+    if(!verifyPassword){
       return res.status(500).json({
         success: true,
-        message: 'Not valied password please use correct password'
+        message: 'password is not correct, please use correct password'
       })
     }
 
+    const accessToken = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET)
     return res.status(200).json({
       success: true,
-      message: 'User found successfully!'
+      message: 'User Login successfully!',
+      data   : accessToken
     })
   }catch(err){
     console.log(err.toString());
   }
 
 })
-
 
 module.exports = router
