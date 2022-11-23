@@ -5,9 +5,9 @@ const dbService = require('../lib/database')
 const { DB_NAME,TODO_COLL,REGISTER } = require('../constants/collection')
 const bcrypt = require('bcrypt')
 const loginServices = require('../services/login-service')
-const authToken = require('../middleware/auth')
+const authMiddleware = require('../middleware/auth')
 
-router.post('/user',authToken.authenticationToken,async(req,res) => {
+router.post('/user',authMiddleware.authenticationToken,async(req,res) => {
   const client = await dbService.getClient();
 
   const userData = await client
